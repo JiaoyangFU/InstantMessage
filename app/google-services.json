@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "237065550410",
+    "firebase_url": "https://message-1a0a7.firebaseio.com",
+    "project_id": "message-1a0a7",
+    "storage_bucket": "message-1a0a7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237065550410:android:5920de3503a2d18c",
+        "android_client_info": {
+          "package_name": "com.google.firebase.quickstart.fcm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "237065550410-jreeiq49vms38jn3n0purkdrjjotahq6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdovVPg2ne5AN3-Ll5ozb_QQC26xPsxHk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237065550410:android:bf2dbc8f65c26d63",
+        "android_client_info": {
+          "package_name": "com.message.instant.instantmessage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "237065550410-jreeiq49vms38jn3n0purkdrjjotahq6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdovVPg2ne5AN3-Ll5ozb_QQC26xPsxHk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

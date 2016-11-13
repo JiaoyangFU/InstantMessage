@@ -10,8 +10,18 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.message.instant.instantmessage.MainActivity">
 
-    <TextView
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="find an exist group"
+        android:ems="10"
+        android:id="@+id/find_group_exit_text"
+        android:layout_alignParentTop="true" />
+
+    <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:id="@+id/group_list_view"
+        android:layout_below="@+id/find_group_exit_text" />
+
 </RelativeLayout>
