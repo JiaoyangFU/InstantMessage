@@ -45,15 +45,13 @@ public class MainActivity extends AppCompatActivity {
         groupsRef = FirebaseDatabase.getInstance().getReference("Groups");
         currentUserRef = usersRef.child(userKey);
 
-
-
         groupList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.group_list_view);
         arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,groupList);
         listView.setAdapter(arrayAdapter);
 
         detectConnection();
-        //updateViewList();
+        updateViewList();
     }
 
     @Override
@@ -99,20 +97,13 @@ public class MainActivity extends AppCompatActivity {
         currentUserRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null) return;
+
                 user = dataSnapshot.getValue(User.class);
                 Toast.makeText(MainActivity.this,"update user list ",Toast.LENGTH_SHORT).show();
-                Log.v("##########MainActivity", user.getUserName());
-                /*
-                Map<String,Object> map2 = new HashMap<String, Object>();
-                usersRef.updateChildren(map2);
 
-                Map<String,Object> map = new HashMap<String, Object>();
-                map.put(userKey, user);
-                usersRef.updateChildren(map);
-                */
-                currentUserRef.setValue(user);
                 groupList.clear();
-               // groupList.addAll(user.getGroupList());
+                groupList.addAll(user.getGroupList());
                 arrayAdapter.notifyDataSetChanged();
             }
 
@@ -160,8 +151,8 @@ public class MainActivity extends AppCompatActivity {
                     Group group = new Group(groupName, userName);
                     String key = groupsRef.push().getKey();
                     groupsRef.child(key).setValue(group);
-                    //user.addNewGroup(groupName);
-                    //currentUserRef.setValue(user);
+                    user.addNewGroup(groupName);
+                    currentUserRef.child("groupList").setValue(user.getGroupList());
                 }
                 else {
                     Toast.makeText(MainActivity.this,"This group exists ",Toast.LENGTH_SHORT).show();

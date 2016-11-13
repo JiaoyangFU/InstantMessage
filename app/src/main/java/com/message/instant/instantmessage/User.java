@@ -12,7 +12,11 @@ public class User {
     private String passWord;
     private List<String> groupList;
 
-    User() {}
+    User() {
+        if (groupList == null) {
+            groupList = new ArrayList<>();
+        }
+    }
 
     User(String name, String pwd) {
         userName = name;
