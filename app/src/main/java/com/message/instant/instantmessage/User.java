@@ -1,6 +1,6 @@
 package com.message.instant.instantmessage;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,7 +17,7 @@ public class User {
     User(String name, String pwd) {
         userName = name;
         passWord = pwd;
-        groupList = new LinkedList<>();
+        groupList = new ArrayList<>();
     }
 
     public String getUserName () {return userName;}

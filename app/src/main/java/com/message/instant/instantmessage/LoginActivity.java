@@ -65,6 +65,7 @@ public class LoginActivity extends Activity {
                         Log.v(TAG, user.getUserName());
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         intent.putExtra("user_name",userName);
+                        intent.putExtra("user_key",itemSnapshot.getKey());
                         startActivity(intent);
                     }
                 }
@@ -96,6 +97,7 @@ public class LoginActivity extends Activity {
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     intent.putExtra("user_name",userName);
+                    intent.putExtra("user_key",key);
                     startActivity(intent);
                 }
                 else {
