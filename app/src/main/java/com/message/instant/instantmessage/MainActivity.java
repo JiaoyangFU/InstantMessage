@@ -1,15 +1,19 @@
 package com.message.instant.instantmessage;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -32,7 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference usersRef;
     private DatabaseReference groupsRef;
     private User user;
-    DatabaseReference currentUserRef;
+    private DatabaseReference currentUserRef;
+    private ValueEventListener currentUserListener, connectListerner;
+    private static final String TAG = "** MainActivity ** ";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +58,34 @@ public class MainActivity extends AppCompatActivity {
 
         detectConnection();
         updateViewList();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                Intent intent = new Intent(getApplicationContext(),ChatActivity.class);
+                intent.putExtra("group_name",((TextView)view).getText().toString() );
+                intent.putExtra("user_name",userName);
+                intent.putExtra("user_key",userKey);
+                Log.v(TAG, "start chat Activity");
+                startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        /*
+        // Remove currentUserListener value event listener
+        if (currentUserListener != null) {
+            currentUserRef.removeEventListener(currentUserListener);
+        }
+
+        if (connectListerner != null) {
+            connectedRef.removeEventListener(connectListerner);
+        }
+        */
     }
 
     @Override
@@ -76,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void detectConnection() {
-        connectedRef.addValueEventListener(new ValueEventListener() {
+        connectListerner = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
@@ -90,11 +124,13 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError error) {
                 // System.err.println("Listener was cancelled");
             }
-        });
+        };
+        connectedRef.addValueEventListener(connectListerner);
+
     }
 
     private void updateViewList() {
-        currentUserRef.addValueEventListener(new ValueEventListener() {
+        currentUserListener = new ValueEventListener(){
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() == null) return;
@@ -111,7 +147,8 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        currentUserRef.addValueEventListener(currentUserListener);
     }
 
     private void addNewGroup() {

@@ -4,4 +4,5 @@
     <color name = "primary_dark">#b71c1c</color>
     <color name = "accent">#F55B5B</color>
     <color name = "button_text">#FFFFFF</color>
+    <color name = "button_background">#FFFFFF</color>
 </resources>

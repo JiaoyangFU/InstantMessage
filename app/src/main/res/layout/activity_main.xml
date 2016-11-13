@@ -11,10 +11,11 @@
     tools:context="com.message.instant.instantmessage.MainActivity">
 
     <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
         android:hint="find an exist group"
-        android:ems="10"
+        android:ems="14"
+        android:background="@drawable/rounded_edittext"
         android:id="@+id/find_group_exit_text"
         android:layout_alignParentTop="true" />
 
@@ -23,5 +24,15 @@
         android:layout_height="wrap_content"
         android:id="@+id/group_list_view"
         android:layout_below="@+id/find_group_exit_text" />
+
+    <ImageButton
+        android:layout_width="40dp"
+        android:layout_height="30dp"
+        android:background="@color/primary"
+        android:src="@drawable/search_icon"
+        android:id="@+id/find_button"
+        android:layout_alignBottom = "@id/find_group_exit_text"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

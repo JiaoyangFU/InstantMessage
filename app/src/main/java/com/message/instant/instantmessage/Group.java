@@ -13,14 +13,22 @@ public class Group {
     private String groupName;
     private String hostName;
     private List<String> userList;
-    private Map<String, Map<String, String>> message;
-
+    private Map<String, String> message;
+    Group () {
+        if (userList == null) {
+            userList = new LinkedList<>();
+            userList.add(hostName);
+        }
+        if (message == null) {
+            message = new HashMap<String, String>();
+        }
+    }
     Group(String groupName, String hostName) {
         this.groupName = groupName;
         this.hostName = hostName;
         userList = new LinkedList<>();
         userList.add(hostName);
-        message = new HashMap<String, Map<String, String>>();
+        message = new HashMap<String, String>();
     }
 
     String getGroupName () {return groupName;}
