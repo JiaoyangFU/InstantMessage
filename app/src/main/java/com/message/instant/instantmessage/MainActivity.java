@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,34 +32,36 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> groupList;
     private String userName;
-    private String userKey;
+    private String userKey, groupKey;
     private DatabaseReference connectedRef;
     private DatabaseReference usersRef;
     private DatabaseReference groupsRef;
     private User user;
     private DatabaseReference currentUserRef;
-    private ValueEventListener currentUserListener, connectListerner;
-    private ImageButton find_button;
+    private ValueEventListener currentUserListener, connectListener;
     private EditText search_input;
     private static final String TAG = "** MainActivity ** ";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         userName = getIntent().getExtras().get("user_name").toString();
         userKey = getIntent().getExtras().get("user_key").toString();
 
         connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
         usersRef = FirebaseDatabase.getInstance().getReference("Users");
         groupsRef = FirebaseDatabase.getInstance().getReference("Groups");
+        usersRef.keepSynced(true);
+        groupsRef.keepSynced(true);
         currentUserRef = usersRef.child(userKey);
 
         groupList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.group_list_view);
-        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,groupList);
+        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, groupList);
         listView.setAdapter(arrayAdapter);
 
-        //find_button = (ImageButton) findViewById(R.id.find_button);
         search_input = (EditText) findViewById(R.id.find_group_exit_text);
 
         detectConnection();
@@ -69,11 +70,13 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String groupName = ((TextView) view).getText().toString();
+                Log.v(TAG, "group Name = " + groupName);
 
-                Intent intent = new Intent(getApplicationContext(),ChatActivity.class);
-                intent.putExtra("group_name",((TextView)view).getText().toString() );
-                intent.putExtra("user_name",userName);
-                intent.putExtra("user_key",userKey);
+                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                intent.putExtra("group_name", groupName);
+                intent.putExtra("user_name", userName);
+                intent.putExtra("user_key", userKey);
                 Log.v(TAG, "start chat Activity");
                 startActivity(intent);
             }
@@ -83,16 +86,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        /*
         // Remove currentUserListener value event listener
         if (currentUserListener != null) {
             currentUserRef.removeEventListener(currentUserListener);
         }
 
-        if (connectListerner != null) {
-            connectedRef.removeEventListener(connectListerner);
+        if (connectListener != null) {
+            connectedRef.removeEventListener(connectListener);
         }
-        */
     }
 
     @Override
@@ -117,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void detectConnection() {
-        connectListerner = new ValueEventListener() {
+        connectListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
@@ -127,23 +128,24 @@ public class MainActivity extends AppCompatActivity {
                     setTitle("Status: Down");
                 }
             }
+
             @Override
             public void onCancelled(DatabaseError error) {
                 // System.err.println("Listener was cancelled");
             }
         };
-        connectedRef.addValueEventListener(connectListerner);
+        connectedRef.addValueEventListener(connectListener);
 
     }
 
     private void updateViewList() {
-        currentUserListener = new ValueEventListener(){
+        currentUserListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() == null) return;
 
                 user = dataSnapshot.getValue(User.class);
-                Toast.makeText(MainActivity.this,"update user list ",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "update user list ", Toast.LENGTH_SHORT).show();
 
                 groupList.clear();
                 groupList.addAll(user.getGroupList());
@@ -169,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String groupName = input_field.getText().toString();
-                if(!groupName.isEmpty()) {
+                if (!groupName.isEmpty()) {
                     detectGroupExist(groupName);
                 }
             }
@@ -184,22 +186,21 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void detectGroupExist (final String groupName) {
+    private void detectGroupExist(final String groupName) {
         String child = "groupName";
         Query query = groupsRef.orderByChild(child).equalTo(groupName);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists() == false)  {
-                    Toast.makeText(MainActivity.this,"create a new group ",Toast.LENGTH_SHORT).show();
+                if (dataSnapshot.exists() == false) {
+                    Toast.makeText(MainActivity.this, "create a new group ", Toast.LENGTH_SHORT).show();
                     Group group = new Group(groupName, userName);
                     String key = groupsRef.push().getKey();
                     groupsRef.child(key).setValue(group);
                     user.addNewGroup(groupName);
                     currentUserRef.child("groupList").setValue(user.getGroupList());
-                }
-                else {
-                    Toast.makeText(MainActivity.this,"This group exists ",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "This group exists ", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -218,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         List<String> groupList = user.getGroupList();
         for (String group : user.getGroupList()) {
             if (group.equals(groupName)) {
-                Toast.makeText(MainActivity.this,"In current group List",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "In current group List", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -227,20 +228,20 @@ public class MainActivity extends AppCompatActivity {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null)  {
-                    for (DataSnapshot itemSnapshot: dataSnapshot.getChildren()){
+                if (dataSnapshot.getValue() != null) {
+                    for (DataSnapshot itemSnapshot : dataSnapshot.getChildren()) {
                         Group group = itemSnapshot.getValue(Group.class);
 
                         group.addNewUser(userName);
+                        Log.v(TAG, itemSnapshot.getKey());
                         DatabaseReference curGroupRef = groupsRef.child(itemSnapshot.getKey());
-                        curGroupRef.child("userList").setValue(user.getGroupList());
+                        curGroupRef.child("userList").setValue(group.getUserList());
 
                         user.addNewGroup(groupName);
                         currentUserRef.child("groupList").setValue(user.getGroupList());
                     }
-                }
-                else {
-                    Toast.makeText(MainActivity.this,"No this group",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "No this group", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -249,6 +250,11 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onBackPressed () {
+        finish();
     }
 }
 

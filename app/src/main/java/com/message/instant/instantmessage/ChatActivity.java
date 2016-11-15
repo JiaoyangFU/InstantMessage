@@ -2,10 +2,13 @@ package com.message.instant.instantmessage;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -13,7 +16,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by fujiaoyang1 on 11/13/16.
@@ -26,11 +31,10 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference connectedRef;
     private DatabaseReference usersRef;
     private DatabaseReference groupsRef;
-    private User user;
-    private DatabaseReference currentUserRef;
-    private ValueEventListener currentUserListener, connectListerner;
+    private DatabaseReference currentUserRef, currentGroupMsgRef, currentGroupRef;
+    private ValueEventListener connectListener;
+    private ChildEventListener currentGroupMsgListener;
 
-    private ImageButton btn_send_msg;
     private EditText input_msg;
     private TextView chat_conversation;
 
@@ -39,27 +43,67 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        input_msg = (EditText)findViewById(R.id.msg_input);
+        chat_conversation = (TextView)findViewById(R.id.msg_text);
+
         userName = getIntent().getExtras().get("user_name").toString();
         userKey = getIntent().getExtras().get("user_key").toString();
         groupName = getIntent().getExtras().get("group_name").toString();
 
-        // Log.v(TAG, "reach chat Activity");
         connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
         usersRef = FirebaseDatabase.getInstance().getReference("Users");
         groupsRef = FirebaseDatabase.getInstance().getReference("Groups");
-        currentUserRef = usersRef.child(userKey);
-
-        btn_send_msg = (ImageButton) findViewById(R.id.send_button);
-        input_msg = (EditText) findViewById(R.id.msg_input);
-        chat_conversation = (TextView) findViewById(R.id.msg_text);
-
+        usersRef.keepSynced(true);
+        groupsRef.keepSynced(true);
+        initializeGroupKey(groupName);
         detectConnection();
+        Log.v(TAG, "group Name = " + groupName);
+    }
 
+    private void initializeGroupKey(String groupName) {
+        String child = "groupName";
+        Query query = groupsRef.orderByChild(child).equalTo(groupName);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    for (DataSnapshot itemSnapshot : dataSnapshot.getChildren()) {
+                        groupKey = itemSnapshot.getKey();
+                        currentGroupRef = groupsRef.child(groupKey);
+                        currentGroupMsgRef = currentGroupRef.child("messages");
+                        updateMsgHistory();
 
+                        Log.v(TAG, "groupKey = " + groupKey);
+                        //Log.v(TAG, "===> groupKey = " + groupKey);
+                    }
+                } else {
+                    Toast.makeText(ChatActivity.this, " cannot find current group ", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        // Remove currentUserListener value event listener
+        if (currentGroupMsgListener != null) {
+            currentGroupMsgRef.removeEventListener(currentGroupMsgListener);
+        }
+
+        if (connectListener != null) {
+            connectedRef.removeEventListener(connectListener);
+        }
     }
 
     private void detectConnection() {
-        connectListerner = new ValueEventListener() {
+        connectListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
@@ -74,60 +118,68 @@ public class ChatActivity extends AppCompatActivity {
                 // System.err.println("Listener was cancelled");
             }
         };
-        connectedRef.addValueEventListener(connectListerner);
+        connectedRef.addValueEventListener(connectListener);
     }
 
-    private void initializeGroupKey() {
-        String child = "groupName";
-        Query query = groupsRef.orderByChild(child).equalTo(groupName);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null)  {
-                    for (DataSnapshot itemSnapshot: dataSnapshot.getChildren()){
-                        groupKey = itemSnapshot.getKey();
 
-                    }
-                }
+    public void sendMessage(View view) {
+
+        Map<String, String> message;
+        message = new HashMap<String, String>();
+        message.put("userName",userName);
+        message.put("Msg",input_msg.getText().toString());
+        String msg_key = currentGroupRef.child("messages").push().getKey();
+        currentGroupRef.child("messages").child(msg_key).setValue(message);
+        Log.v(TAG, msg_key + "  update message");
+    }
+
+    private void updateMsgHistory() {
+        currentGroupMsgListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                append_chat_conversation(dataSnapshot);
             }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                append_chat_conversation(dataSnapshot);
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
-    }
-
-    private void sendMessage() {
-        /*
-        btn_send_msg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Map<String, String> message;
-                message = new  HashMap<String, String>();
-
-                message.put("userName",userName);
-                message.put("Msg",input_msg.getText().toString());
-                String msg_key = groupsRef.child("message").push().getKey();
-
-                groupsRef.child(msg_key).setValue(message);
-                user.addNewGroup(groupName);
-            }
-        });
-        */
-
+        };
+        currentGroupMsgRef.addChildEventListener(currentGroupMsgListener);
     }
 
     private void append_chat_conversation(DataSnapshot dataSnapshot) {
-        String chat_msg,chat_user_name;
+        String name,chat_msg;
+
         Iterator i = dataSnapshot.getChildren().iterator();
 
         while (i.hasNext()){
 
             chat_msg = (String) ((DataSnapshot)i.next()).getValue();
-            chat_user_name = (String) ((DataSnapshot)i.next()).getValue();
-
-            chat_conversation.append(chat_user_name +" : "+chat_msg +" \n");
+            name = (String) ((DataSnapshot)i.next()).getValue();
+            chat_conversation.append(name +" : "+chat_msg +" \n");
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 }
 
