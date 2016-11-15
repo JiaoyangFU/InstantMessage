@@ -31,6 +31,7 @@
         android:background="@color/primary"
         android:src="@drawable/search_icon"
         android:id="@+id/find_button"
+        android:onClick="searchGroupToJoin"
         android:layout_alignBottom = "@id/find_group_exit_text"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />

@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private User user;
     private DatabaseReference currentUserRef;
     private ValueEventListener currentUserListener, connectListerner;
+    private ImageButton find_button;
+    private EditText search_input;
     private static final String TAG = "** MainActivity ** ";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.group_list_view);
         arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,groupList);
         listView.setAdapter(arrayAdapter);
+
+        //find_button = (ImageButton) findViewById(R.id.find_button);
+        search_input = (EditText) findViewById(R.id.find_group_exit_text);
 
         detectConnection();
         updateViewList();
@@ -203,6 +209,37 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-}
+    public void searchGroupToJoin(View view) {
+        String child = "groupName";
+        final String groupName = search_input.getText().toString();
+        Log.v(TAG, "group Name :" + groupName);
 
+        Query query = groupsRef.orderByChild(child).equalTo(groupName);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null)  {
+                    for (DataSnapshot itemSnapshot: dataSnapshot.getChildren()){
+                        Group group = itemSnapshot.getValue(Group.class);
+
+                        group.addNewUser(userName);
+                        DatabaseReference curGroupRef = groupsRef.child(itemSnapshot.getKey());
+                        curGroupRef.child("userList").setValue(user.getGroupList());
+
+                        user.addNewGroup(groupName);
+                        currentUserRef.child("groupList").setValue(user.getGroupList());
+                    }
+                }
+                else {
+                    Toast.makeText(MainActivity.this,"No this group",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+}
 

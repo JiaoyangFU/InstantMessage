@@ -31,7 +31,11 @@ public class Group {
         message = new HashMap<String, String>();
     }
 
-    String getGroupName () {return groupName;}
-    String getHostName () {return hostName;}
-    List<String>  getUserList () {return userList;}
+    public void addNewUser(String userName) {
+        userList.add(groupName);
+    }
+
+    public String getGroupName () {return groupName;}
+    public String getHostName () {return hostName;}
+    public List<String>  getUserList () {return userList;}
 }
