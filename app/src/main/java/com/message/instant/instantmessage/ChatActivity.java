@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,10 +35,9 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference currentUserRef, currentGroupMsgRef, currentGroupRef;
     private ValueEventListener connectListener;
     private ChildEventListener currentGroupMsgListener;
-    private LinearLayout chatLinearLayout;
+    private RelativeLayout chat_layout;
     private EditText input_msg;
-    private boolean color_flag = false;
-    private TextView chat_conversation;
+    private static int msg_id = 0;
 
     private static final String TAG = "** ChatActivity ** ";
     @Override
@@ -46,9 +45,8 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        chatLinearLayout = (LinearLayout) findViewById(R.id.chat_linear_layout);
+        chat_layout = (RelativeLayout)findViewById(R.id.chat_layout);
         input_msg = (EditText)findViewById(R.id.msg_input);
-        //chat_conversation = (TextView)findViewById(R.id.msg_text);
 
         userName = getIntent().getExtras().get("user_name").toString();
         userKey = getIntent().getExtras().get("user_key").toString();
@@ -170,27 +168,36 @@ public class ChatActivity extends AppCompatActivity {
     private void append_chat_conversation(DataSnapshot dataSnapshot) {
         String name,chat_msg;
         Iterator i = dataSnapshot.getChildren().iterator();
-        LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(10,20,10,20);
+        RelativeLayout.LayoutParams params =
+                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        if (msg_id == 0) {
+            params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        }
+        params.setMargins(10,15,10,15);
+
         while (i.hasNext()){
             chat_msg = (String) ((DataSnapshot)i.next()).getValue();
             name = (String) ((DataSnapshot)i.next()).getValue();
             TextView chat_view = new TextView(this);
-            chat_view.setText(name +": "+chat_msg);
-            if (color_flag) {
-                color_flag = !color_flag;
+
+            if (name.equals(userName)) {
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
                 chat_view.setBackgroundResource(R.drawable.chat_text1);
             }
             else {
-                color_flag = !color_flag;
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
                 chat_view.setBackgroundResource(R.drawable.chat_text2);
             }
 
+            if (msg_id > 0) params.addRule(RelativeLayout.BELOW, msg_id - 1);
+
+            chat_view.setText(name +": "+chat_msg);
+            chat_view.setId(msg_id++);
             chat_view.setPadding(10, 10, 10, 10);
             chat_view.setTextSize(20);
             chat_view.setLayoutParams(params);
-            chatLinearLayout.addView(chat_view);
+            chat_layout.addView(chat_view);
         }
     }
 
