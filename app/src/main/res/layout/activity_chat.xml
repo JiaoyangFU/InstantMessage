@@ -16,6 +16,7 @@
         android:background="@color/primary"
         android:src="@drawable/send_icon"
         android:id="@+id/send_button"
+        android:onClick="sendMessage"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
