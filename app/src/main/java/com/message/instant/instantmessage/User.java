@@ -32,13 +32,20 @@ public class User {
     public void addNewGroup (String groupName) {
         groupList.add(groupName);
     }
-    /*
-    public void addGroupList(Map<String, Boolean> groups) {
-        groupList.(groups);
-    }
-    */
+
     public void delteOneGroup (String groupName) {
         groupList.remove(groupName);
     }
 
+    public void setUserName (String userName) {
+        this.userName = userName;
+    }
+
+    public void setPWD (String passWord) {
+        this.passWord = passWord;
+    }
+
+    public void setGroupList (List<String> groupList) {
+        this.groupList = groupList;
+    }
 }

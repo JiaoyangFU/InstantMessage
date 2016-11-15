@@ -39,4 +39,21 @@ public class Group {
     public String getHostName () {return hostName;}
     public List<String>  getUserList () {return userList;}
     public Map<String, String>  getMsg () {return messages;}
+
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+    public void setUserList(List<String> userList) {
+        this.userList = userList;
+    }
+
+    public void setMessages(Map<String, String> messages) {
+        this.messages = messages;
+    }
 }
