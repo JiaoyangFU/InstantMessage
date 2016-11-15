@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +35,7 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference currentUserRef, currentGroupMsgRef, currentGroupRef;
     private ValueEventListener connectListener;
     private ChildEventListener currentGroupMsgListener;
-
+    private LinearLayout chatLinearLayout;
     private EditText input_msg;
     private TextView chat_conversation;
 
@@ -46,7 +47,6 @@ public class ChatActivity extends AppCompatActivity {
 
         input_msg = (EditText)findViewById(R.id.msg_input);
         chat_conversation = (TextView)findViewById(R.id.msg_text);
-
         userName = getIntent().getExtras().get("user_name").toString();
         userKey = getIntent().getExtras().get("user_key").toString();
         groupName = getIntent().getExtras().get("group_name").toString();
@@ -170,10 +170,9 @@ public class ChatActivity extends AppCompatActivity {
         Iterator i = dataSnapshot.getChildren().iterator();
 
         while (i.hasNext()){
-
             chat_msg = (String) ((DataSnapshot)i.next()).getValue();
             name = (String) ((DataSnapshot)i.next()).getValue();
-            chat_conversation.append(name +" : "+chat_msg +" \n");
+            chat_conversation.append(name +": "+chat_msg +" \n");
         }
     }
 
