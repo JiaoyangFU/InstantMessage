@@ -25,6 +25,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -212,7 +213,15 @@ public class MainActivity extends AppCompatActivity {
     public void searchGroupToJoin(View view) {
         String child = "groupName";
         final String groupName = search_input.getText().toString();
-        Log.v(TAG, "group Name :" + groupName);
+        //Log.v(TAG, "group Name :" + groupName);
+        // if the input group is already in user grouplist stop query
+        List<String> groupList = user.getGroupList();
+        for (String group : user.getGroupList()) {
+            if (group.equals(groupName)) {
+                Toast.makeText(MainActivity.this,"In current group List",Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
 
         Query query = groupsRef.orderByChild(child).equalTo(groupName);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
