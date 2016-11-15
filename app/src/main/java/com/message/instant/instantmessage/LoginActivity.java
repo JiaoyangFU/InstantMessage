@@ -36,7 +36,9 @@ public class LoginActivity extends Activity {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
             calledAlready = true;
         }
+
         usersRef = FirebaseDatabase.getInstance().getReference("Users");
+        usersRef.keepSynced(true);
         user_name_txt = (EditText) findViewById(R.id.user_name_txt);
         password_txt = (EditText)findViewById(R.id.password_txt);
     }
