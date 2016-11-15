@@ -42,13 +42,14 @@
         android:layout_above="@+id/send_button"
         android:layout_alignRight="@+id/send_button"
         android:layout_alignEnd="@+id/send_button">
-
-        <TextView
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:padding="10dp"
             android:layout_height="match_parent"
-            android:background="@drawable/chat_text"
-            android:id="@+id/msg_text" />
+            android:layout_weight="1"
+            android:id="@+id/chat_linear_layout">
+        </LinearLayout>
+
     </ScrollView>
 
 </RelativeLayout>

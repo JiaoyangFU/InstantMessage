@@ -37,6 +37,7 @@ public class ChatActivity extends AppCompatActivity {
     private ChildEventListener currentGroupMsgListener;
     private LinearLayout chatLinearLayout;
     private EditText input_msg;
+    private boolean color_flag = false;
     private TextView chat_conversation;
 
     private static final String TAG = "** ChatActivity ** ";
@@ -45,8 +46,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        chatLinearLayout = (LinearLayout) findViewById(R.id.chat_linear_layout);
         input_msg = (EditText)findViewById(R.id.msg_input);
-        chat_conversation = (TextView)findViewById(R.id.msg_text);
+        //chat_conversation = (TextView)findViewById(R.id.msg_text);
+
         userName = getIntent().getExtras().get("user_name").toString();
         userKey = getIntent().getExtras().get("user_key").toString();
         groupName = getIntent().getExtras().get("group_name").toString();
@@ -166,13 +169,28 @@ public class ChatActivity extends AppCompatActivity {
 
     private void append_chat_conversation(DataSnapshot dataSnapshot) {
         String name,chat_msg;
-
         Iterator i = dataSnapshot.getChildren().iterator();
-
+        LinearLayout.LayoutParams  params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(10,20,10,20);
         while (i.hasNext()){
             chat_msg = (String) ((DataSnapshot)i.next()).getValue();
             name = (String) ((DataSnapshot)i.next()).getValue();
-            chat_conversation.append(name +": "+chat_msg +" \n");
+            TextView chat_view = new TextView(this);
+            chat_view.setText(name +": "+chat_msg);
+            if (color_flag) {
+                color_flag = !color_flag;
+                chat_view.setBackgroundResource(R.drawable.chat_text1);
+            }
+            else {
+                color_flag = !color_flag;
+                chat_view.setBackgroundResource(R.drawable.chat_text2);
+            }
+
+            chat_view.setPadding(10, 10, 10, 10);
+            chat_view.setTextSize(20);
+            chat_view.setLayoutParams(params);
+            chatLinearLayout.addView(chat_view);
         }
     }
 
