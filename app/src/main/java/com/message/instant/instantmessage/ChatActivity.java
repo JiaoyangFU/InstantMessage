@@ -72,11 +72,15 @@ public class ChatActivity extends AppCompatActivity {
         groupsRef.keepSynced(true);
         initializeGroupKey(groupName);
         detectConnection();
-
+        scroll_view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                scroll_view.fullScroll(ScrollView.FOCUS_DOWN);
+            }
+        },50);
 
         Log.v(TAG, "group Name = " + groupName);
     }
-
 
     private void initializeGroupKey(String groupName) {
         String child = "groupName";
