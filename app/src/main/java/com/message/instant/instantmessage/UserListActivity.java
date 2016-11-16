@@ -78,7 +78,7 @@ public class UserListActivity extends AppCompatActivity {
 
             }
         };
-        currentGroupRef.addValueEventListener(currentGroupListener);
+        currentGroupRef.addListenerForSingleValueEvent(currentGroupListener);
     }
 
     private void showUserList(List<String> userList) {

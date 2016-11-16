@@ -27,7 +27,7 @@
 
     <EditText
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:inputType="textPersonName"
         android:hint="Enter your user name"
         android:background="@drawable/rounded_edittext"
@@ -39,7 +39,7 @@
 
     <EditText
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:hint="Enter your password"
         android:background="@drawable/rounded_edittext"
         android:ems="10"

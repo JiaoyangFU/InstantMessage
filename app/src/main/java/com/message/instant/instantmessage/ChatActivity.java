@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,17 +42,24 @@ public class ChatActivity extends AppCompatActivity {
     private ChildEventListener currentGroupMsgListener;
     private RelativeLayout chat_layout;
     private EditText input_msg;
-    private static int msg_id = 0;
+    private Group currentGroup;
+    private ScrollView scroll_view;
+    private int msg_id = 0;
 
     private static final String TAG = "** ChatActivity ** ";
+    private static final String lastMsgID = "LAST_MSG_ID";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-
+        // Check whether we're recreating a previously destroyed instance
+        if (savedInstanceState != null) {
+            // Restore value of members from saved state
+            msg_id = savedInstanceState.getInt(lastMsgID);
+        }
         chat_layout = (RelativeLayout)findViewById(R.id.chat_layout);
         input_msg = (EditText)findViewById(R.id.msg_input);
-
+        scroll_view = (ScrollView)findViewById(R.id.scrollView);
         userName = getIntent().getExtras().get("user_name").toString();
         userKey = getIntent().getExtras().get("user_key").toString();
         groupName = getIntent().getExtras().get("group_name").toString();
@@ -58,12 +67,16 @@ public class ChatActivity extends AppCompatActivity {
         connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
         usersRef = FirebaseDatabase.getInstance().getReference("Users");
         groupsRef = FirebaseDatabase.getInstance().getReference("Groups");
+        currentUserRef = usersRef.child(userKey);
         usersRef.keepSynced(true);
         groupsRef.keepSynced(true);
         initializeGroupKey(groupName);
         detectConnection();
+
+
         Log.v(TAG, "group Name = " + groupName);
     }
+
 
     private void initializeGroupKey(String groupName) {
         String child = "groupName";
@@ -74,6 +87,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (dataSnapshot.getValue() != null) {
                     for (DataSnapshot itemSnapshot : dataSnapshot.getChildren()) {
                         groupKey = itemSnapshot.getKey();
+                        currentGroup = itemSnapshot.getValue(Group.class);
                         currentGroupRef = groupsRef.child(groupKey);
                         currentGroupMsgRef = currentGroupRef.child("messages");
                         updateMsgHistory();
@@ -95,6 +109,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
+        /*
         // Remove currentUserListener value event listener
         if (currentGroupMsgListener != null) {
             currentGroupMsgRef.removeEventListener(currentGroupMsgListener);
@@ -103,6 +118,7 @@ public class ChatActivity extends AppCompatActivity {
         if (connectListener != null) {
             connectedRef.removeEventListener(connectListener);
         }
+        */
     }
 
     @Override
@@ -123,6 +139,7 @@ public class ChatActivity extends AppCompatActivity {
                 listAllUsers();
                 break;
             case R.id.quit_group:
+                quitGroup();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -171,7 +188,6 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 append_chat_conversation(dataSnapshot);
-
             }
 
             @Override
@@ -226,6 +242,12 @@ public class ChatActivity extends AppCompatActivity {
             chat_view.setLayoutParams(params);
             chat_layout.addView(chat_view);
         }
+        scroll_view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                scroll_view.fullScroll(ScrollView.FOCUS_DOWN);
+            }
+        },1000);
     }
 
     private void listAllUsers() {
@@ -235,6 +257,40 @@ public class ChatActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    // remove user from group list
+    // remove group from user list
+    private void quitGroup() {
+
+        List<String> userList = currentGroup.getUserList();
+        userList.remove(userName);
+        currentGroupRef.child("userList").setValue(userList);
+
+        currentUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null) return;
+                User user = dataSnapshot.getValue(User.class);
+                List<String> groupList = user.getGroupList();
+                groupList.remove(groupName);
+                currentUserRef.child("groupList").setValue(groupList);
+
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        finish();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the user's current  state
+        savedInstanceState.putInt(lastMsgID, msg_id);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
     @Override
     public void onBackPressed() {
         finish();

@@ -86,14 +86,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        // Remove currentUserListener value event listener
+
+        /*// Remove currentUserListener value event listener
         if (currentUserListener != null) {
             currentUserRef.removeEventListener(currentUserListener);
         }
-
+        */
         if (connectListener != null) {
             connectedRef.removeEventListener(connectListener);
         }
+
     }
 
     @Override
@@ -145,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
                 if (dataSnapshot.getValue() == null) return;
 
                 user = dataSnapshot.getValue(User.class);
-                Toast.makeText(MainActivity.this, "update user list ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "update group list ", Toast.LENGTH_SHORT).show();
 
                 groupList.clear();
                 groupList.addAll(user.getGroupList());
