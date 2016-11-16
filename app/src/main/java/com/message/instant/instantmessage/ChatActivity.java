@@ -1,9 +1,11 @@
 package com.message.instant.instantmessage;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -89,7 +91,6 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
-
     }
     @Override
     public void onStop() {
@@ -110,6 +111,24 @@ public class ChatActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_chat, menu);
         return true;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.see_all_users:
+                listAllUsers();
+                break;
+            case R.id.quit_group:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 
     private void detectConnection() {
         connectListener = new ValueEventListener() {
@@ -207,6 +226,13 @@ public class ChatActivity extends AppCompatActivity {
             chat_view.setLayoutParams(params);
             chat_layout.addView(chat_view);
         }
+    }
+
+    private void listAllUsers() {
+        Intent intent = new Intent(getApplicationContext(), UserListActivity.class);
+        intent.putExtra("group_key", groupKey);
+        Log.v(TAG, "start UserList Activity");
+        startActivity(intent);
     }
 
     @Override
