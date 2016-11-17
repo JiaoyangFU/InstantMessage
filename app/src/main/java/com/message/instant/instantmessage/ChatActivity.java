@@ -44,7 +44,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText input_msg;
     private Group currentGroup;
     private ScrollView scroll_view;
-    private int msg_id = 0;
+    private int msg_id = 1;
 
     private static final String TAG = "** ChatActivity ** ";
     private static final String lastMsgID = "LAST_MSG_ID";
@@ -97,7 +97,6 @@ public class ChatActivity extends AppCompatActivity {
                         updateMsgHistory();
 
                         Log.v(TAG, "groupKey = " + groupKey);
-                        //Log.v(TAG, "===> groupKey = " + groupKey);
                     }
                 } else {
                     Toast.makeText(ChatActivity.this, " cannot find current group ", Toast.LENGTH_SHORT).show();
@@ -113,7 +112,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        /*
+
         // Remove currentUserListener value event listener
         if (currentGroupMsgListener != null) {
             currentGroupMsgRef.removeEventListener(currentGroupMsgListener);
@@ -122,7 +121,6 @@ public class ChatActivity extends AppCompatActivity {
         if (connectListener != null) {
             connectedRef.removeEventListener(connectListener);
         }
-        */
     }
 
     @Override
@@ -149,8 +147,6 @@ public class ChatActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
     private void detectConnection() {
         connectListener = new ValueEventListener() {
             @Override
@@ -170,7 +166,6 @@ public class ChatActivity extends AppCompatActivity {
         connectedRef.addValueEventListener(connectListener);
     }
 
-
     public void sendMessage(View view) {
 
         Map<String, String> message;
@@ -179,7 +174,7 @@ public class ChatActivity extends AppCompatActivity {
         message.put("Msg",input_msg.getText().toString());
         String msg_key = currentGroupRef.child("messages").push().getKey();
         currentGroupRef.child("messages").child(msg_key).setValue(message);
-        Log.v(TAG, msg_key + "  update message");
+        //Log.v(TAG, msg_key + "  update message");
     }
 
     private void updateMsgHistory() {
@@ -187,16 +182,19 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 append_chat_conversation(dataSnapshot);
+                Log.v(TAG, dataSnapshot.getKey() + "  update message <== add" );
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 append_chat_conversation(dataSnapshot);
+                Log.v(TAG, dataSnapshot.getKey() + "  update message <== change");
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                //append_chat_conversation(dataSnapshot);
+                //Log.v(TAG, dataSnapshot.getKey() + "  update message <== removed");
             }
 
             @Override
@@ -213,21 +211,26 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void append_chat_conversation(DataSnapshot dataSnapshot) {
+        Log.v(TAG,  " msg id: " + msg_id);
         String name,chat_msg;
         Iterator i = dataSnapshot.getChildren().iterator();
         RelativeLayout.LayoutParams params =
                 new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        if (msg_id == 0) {
+        if (msg_id == 1) {
             params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+            //params.addRule(RelativeLayout.BELOW, R.id.top_textview);
+        }
+        else {
+            params.addRule(RelativeLayout.BELOW, msg_id - 1);
         }
         params.setMargins(10,15,10,15);
 
         while (i.hasNext()){
             chat_msg = (String) ((DataSnapshot)i.next()).getValue();
             name = (String) ((DataSnapshot)i.next()).getValue();
+            Log.v(TAG,  " chat_msg: " + chat_msg);
             TextView chat_view = new TextView(this);
-
             if (name.equals(userName)) {
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
                 chat_view.setBackgroundResource(R.drawable.chat_text1);
@@ -237,10 +240,8 @@ public class ChatActivity extends AppCompatActivity {
                 chat_view.setBackgroundResource(R.drawable.chat_text2);
             }
 
-            if (msg_id > 0) params.addRule(RelativeLayout.BELOW, msg_id - 1);
-
             chat_view.setText(name +": "+chat_msg);
-            chat_view.setId(msg_id++);
+            chat_view.setId(msg_id);
             chat_view.setPadding(10, 10, 10, 10);
             chat_view.setTextSize(20);
             chat_view.setLayoutParams(params);
@@ -252,6 +253,7 @@ public class ChatActivity extends AppCompatActivity {
                 scroll_view.fullScroll(ScrollView.FOCUS_DOWN);
             }
         },1000);
+        msg_id++;
     }
 
     private void listAllUsers() {
