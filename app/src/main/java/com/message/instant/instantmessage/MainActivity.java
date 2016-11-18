@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> groupList;
     private String userName;
-    private String userKey, groupKey;
+    private String userKey;
     private DatabaseReference connectedRef;
     private DatabaseReference usersRef;
     private DatabaseReference groupsRef;
@@ -95,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
         if (connectListener != null) {
             connectedRef.removeEventListener(connectListener);
         }
-
     }
 
     @Override
@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
                 groupList.clear();
                 groupList.addAll(user.getGroupList());
+
                 arrayAdapter.notifyDataSetChanged();
             }
 
@@ -201,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
                     groupsRef.child(key).setValue(group);
                     user.addNewGroup(groupName);
                     currentUserRef.child("groupList").setValue(user.getGroupList());
+                    addGroupListener(key);
                 } else {
                     Toast.makeText(MainActivity.this, "This group exists ", Toast.LENGTH_SHORT).show();
                 }
@@ -235,12 +237,12 @@ public class MainActivity extends AppCompatActivity {
                         Group group = itemSnapshot.getValue(Group.class);
 
                         group.addNewUser(userName);
-                        Log.v(TAG, itemSnapshot.getKey());
+                        //Log.v(TAG, itemSnapshot.getKey());
                         DatabaseReference curGroupRef = groupsRef.child(itemSnapshot.getKey());
                         curGroupRef.child("userList").setValue(group.getUserList());
-
                         user.addNewGroup(groupName);
                         currentUserRef.child("groupList").setValue(user.getGroupList());
+                        addGroupListener(itemSnapshot.getKey());
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "No this group", Toast.LENGTH_SHORT).show();
@@ -252,6 +254,42 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void addGroupListener(String groupKey) {
+        ChildEventListener currentGroupMsgListener= new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                notifyMSg();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        DatabaseReference currentGroupMsgRef = groupsRef.child(groupKey).child("messages");
+        currentGroupMsgRef.addChildEventListener(currentGroupMsgListener);
+    }
+
+    private void notifyMSg() {
+        Toast.makeText(MainActivity.this, "New Message", Toast.LENGTH_SHORT).show();
     }
 
     @Override

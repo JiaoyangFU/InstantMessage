@@ -93,6 +93,7 @@ public class ChatActivity extends AppCompatActivity {
                         groupKey = itemSnapshot.getKey();
                         currentGroup = itemSnapshot.getValue(Group.class);
                         currentGroupRef = groupsRef.child(groupKey);
+
                         currentGroupMsgRef = currentGroupRef.child("messages");
                         updateMsgHistory();
 
